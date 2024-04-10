@@ -51,8 +51,35 @@ const AddPhoto = () => {
         'https://via.placeholder.com/150/FF4500/FFFFFF/?text=Pink+and+Orange'
     ];
 
-    const handleImageClick = (image) => {
-        dispatch(setSelectedImage(image));
+    const handleImageClick = async (file) => {
+        console.log(file);
+        if (file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await axios.post('http://localhost:4001/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    withCredentials: true,
+                    // credentials: 'include',
+                });
+                // Handle successful response
+                console.log('File uploaded successfully:', response.data.filename);
+                dispatch(setAvatar(response.data.filename));
+                const reader = new FileReader();
+                reader.onload = () => {
+                    dispatch(setSelectedImage(reader.result));
+                };
+                reader.readAsDataURL(file);
+            } catch (error) {
+                // Handle error
+                console.error('Error uploading file:', error);
+            }
+        }
+        dispatch(setSelectedImage(file));
     };
 
     const [showImages, setShowImages] = useState(false);

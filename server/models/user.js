@@ -24,13 +24,17 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
+    emailToken:{
+        type:String,
+    },
     avatar:{
         type:String,
     },
     location:{
-        type:String,
-    },
-    refreshToken:{
         type:String,
     },
     selectedRoles: {

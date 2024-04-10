@@ -1,19 +1,18 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import axios from 'axios';
 import { BiSolidError } from 'react-icons/bi';
 import { LuDot } from "react-icons/lu";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { setFormData, setErrors, setShowToast, setToastMessage } from '../redux/actions/signUpSlice';
-import { setAccessToken, setRefreshToken } from '../redux/actions/authSlice';
+import { setAccessToken, setUser } from '../redux/actions/authSlice';
 import api from '../api/api';
-import setupAxiosInterceptor from '../utils/axiosInterceptor';
 
 const SignUpForm = () => {
     const formData = useSelector((state) => state.signUp.formData);
     const errors = useSelector((state) => state.signUp.errors);
     const showToast = useSelector((state) => state.signUp.showToast);
     const toastMessage = useSelector((state) => state.signUp.toastMessage);
+    const user = useSelector(state => state.auth.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -56,15 +55,14 @@ const SignUpForm = () => {
         }
         // If no errors, submit the form
         try {
-            
+
             const response = await api.post('/signup', formData);
             console.log('User created successfully:', response.data);
             // const res = setupAxiosInterceptor(dispatch);
             const { accessToken } = response.data;
-            const refreshToken = response.data.user.refreshToken;
-            console.log("refreshToken",refreshToken);
+            const user = response.data.user;
             dispatch(setAccessToken(accessToken));
-            dispatch(setRefreshToken(refreshToken));
+            dispatch(setUser(user));
             dispatch(setShowToast(true));
             dispatch(setToastMessage('Successfully Signed up !'));
             setTimeout(() => {
@@ -85,9 +83,11 @@ const SignUpForm = () => {
                     }
                 } else {
                     console.error('Server error:', data);
+                    dispatch(setErrors({ server: 'Sorry, we are currently experiencing technical difficulties. Please try again later.' }));
                 }
             } else {
                 console.error('Network error:', error.message);
+                dispatch(setErrors({ server: 'Sorry, we are currently experiencing technical difficulties. Please try again later.' }));
             }
         }
     };
@@ -183,14 +183,21 @@ const SignUpForm = () => {
                                     name='terms'
                                     id='terms'
                                     type='checkbox'
-                                    className='w-4 h-4'
+                                    className='w-4 h-4 border border-[#E0E0E0] rounded'
                                     checked={formData.terms}
                                     onChange={handleChange}
                                 />
                             </div>
                             <p className='text-[#6E6D7A] text-sm'>Creating an account means you're okay with our <span className='text-[#4F3CC9] cursor-pointer'>Terms of Service, Privacy Policy</span>, and our default <span className='text-[#4F3CC9] cursor-pointer'>Notification Settings.</span></p>
                         </div>
-                        <button type="submit" className="bg-[#EA4C89] rounded-xl text-white px-4 py-2 hover:scale-105 duration-300 mt-6 w-full md:w-auto">Create Account</button>
+                        <div className='flex gap-3'>
+                            <button type="submit" className="bg-[#EA4C89] rounded-xl text-white px-4 py-2 hover:scale-105 duration-300 mt-6 w-full md:w-auto">Create Account</button>
+                            {user && (
+                                <Link to="/addPhoto">
+                                    <button type="submit" className="bg-[#585858] rounded-xl text-white px-4 py-2 hover:scale-105 duration-300 mt-6 w-full md:w-auto">Next</button>
+                                </Link>
+                            )}
+                        </div>
                         <p className='text-[#6E6D7A] text-sm mt-4'>This site is protected by reCAPTCHA and the Google <span className='text-[#4F3CC9] cursor-pointer'>Privacy Policy</span> and <span className='text-[#4F3CC9] cursor-pointer'>Terms of Service</span> apply.</p>
                     </div>
                 </div>

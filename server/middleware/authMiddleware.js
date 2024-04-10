@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const Session = require('../models/session');
 
 const secret = 'secretpassword';
 const secret1 = 'secretpassword2'; 
@@ -36,12 +35,6 @@ const authenticate = async (req, res, next) => {
                         if (err) {
                             return res.status(401).json({ message: 'Refresh token is invalid' });
                         }
-                        
-                        // Check if refresh token is associated with a valid session
-                        // const session = await Session.findOne({ refreshToken });
-                        // if (!session) {
-                        //     return res.status(401).json({ message: 'Session not found for refresh token' });
-                        // }
                         
                         // Generate new access token
                         const user = await User.findById(decodedRefreshToken.userId);

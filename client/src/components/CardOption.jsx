@@ -35,7 +35,7 @@ const CardOption = ({ cardNumber, selectedCards, handleCardClick, title }) => {
                 name={`terms${cardNumber}`}
                 id={`terms${cardNumber}`}
                 type='checkbox'
-                className='w-6 h-6 mt-2 rounded-full'
+                className='w-6 h-6 mt-2 rounded-full border-[1px] border-[#E0E0E0]'
                 onChange={() => handleCardClick(cardNumber)}
                 checked={selectedCards.includes(cardNumber)}
             />

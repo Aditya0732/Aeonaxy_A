@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const User = require('../models/user');
-const Session = require('../models/session');
+const crypto = require('crypto');
 
 const generateAccessToken = (user) => {
     return jwt.sign({ userId: user._id }, "secretpassword", { expiresIn: '15m' });
@@ -19,8 +18,6 @@ const generateRefreshToken = (user) => {
 exports.signup = async (req, res) => {
     try {
         const { email, name, userName, password, terms } = req.body;
-        console.log("hi");
-        // Check if user with the email or userName already exists
         const existingEmailUser = await User.findOne({ email });
         const existingUserNameUser = await User.findOne({ userName });
         if (existingEmailUser) {
@@ -31,12 +28,11 @@ exports.signup = async (req, res) => {
         }
 
         // Create a new user
-        const newUser = await User.create({ email, name, userName, password, terms });
+        const newUser = await User.create({ email, name, userName, password, terms, emailToken:crypto.randomBytes(64).toString("hex") });
         const accessToken = generateAccessToken(newUser);
         const refreshToken = generateRefreshToken(newUser);
         newUser.refreshToken = refreshToken;
         const result = await newUser.save();
-        console.log(result);
 
         // Set refresh token as HTTP cookie
         res.cookie('refreshToken', refreshToken, {
@@ -54,82 +50,26 @@ exports.signup = async (req, res) => {
     }
 };
 
+exports.verifyEmail = async(req,res) => {
+    try{
+        const emailToken = req.body.emailToken;
+        console.log(req.body);
+        if(!emailToken) return res.status(404).json("Email token is required...");
 
-// exports.checkExisting = async (req, res) => {
-//     try {
-//         const { email, userName } = req.body;
+        const user = await User.findOne({ emailToken: emailToken});
 
-//         // Check if email exists
-//         const existingEmailUser = await User.findOne({ email });
-//         // Check if username exists
-//         const existingUserNameUser = await User.findOne({ userName });
+        if(user){
+            user.emailToken = null;
+            user.isVerified = true;
 
-//         if (existingEmailUser) {
-//             return res.status(409).json({ message: 'Email is already registered' });
-//         }
-//         if (existingUserNameUser) {
-//             return res.status(409).json({ message: 'Username is already taken' });
-//         }
+            await user.save();
 
-//         res.status(200).json({ message: 'Email and username are available' });
-//     } catch (error) {
-//         console.error('Error checking existing email and username:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//     }
-// };
-
-
-
-// exports.login = async (req, res) => {
-//     try {
-//         const { email, password } = req.body;
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             return res.status(401).json({ message: 'Invalid email or password' });
-//         }
-//         const isValidPassword = await bcrypt.compare(password, user.password);
-//         if (!isValidPassword) {
-//             return res.status(401).json({ message: 'Invalid email or password' });
-//         }
-//         const accessToken = generateAccessToken(user);
-//         const refreshToken = generateRefreshToken(user);
-//         res.status(200).json({ accessToken, refreshToken });
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
-
-// exports.login = async (req, res) => {
-//     const { email, password } = req.body;
-
-//     try {
-//         // Find user by email
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             return res.status(401).json({ message: 'Invalid email or password' });
-//         }
-
-//         // Verify password
-//         const isPasswordValid = await bcrypt.compare(password, user.password);
-//         if (!isPasswordValid) {
-//             return res.status(401).json({ message: 'Invalid email or password' });
-//         }
-
-//         // Generate access token and refresh token
-//         const accessToken = generateAccessToken(user);
-//         const refreshToken = generateRefreshToken(user);
-
-//         // Store session in database
-//         const session = new Session({
-//             userId: user._id,
-//             accessToken,
-//             refreshToken
-//         });
-//         await session.save();
-
-//         res.json({ accessToken, refreshToken });
-//     } catch (error) {
-//         console.error('Login error:', error);
-//         res.status(500).json({ message: 'Internal server error' });
-//     }
-// };
+            res.status(200).json({user:user});
+        }else{
+            res.status(404).json("Email verification failed, invalid token");
+        }
+    }catch (error) {
+        console.log("Error while verifying email :",error);
+        res.status(500).json(error.message);
+    }
+};
