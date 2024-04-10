@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { setFormData, setErrors, setShowToast, setToastMessage } from '../redux/actions/signUpSlice';
 import { setAccessToken, setUser } from '../redux/actions/authSlice';
 import api from '../api/api';
+import { setLoader } from '../redux/actions/infoSlice';
 
 const SignUpForm = () => {
     const formData = useSelector((state) => state.signUp.formData);
@@ -55,10 +56,9 @@ const SignUpForm = () => {
         }
         // If no errors, submit the form
         try {
-
+            dispatch(setLoader(true));
             const response = await api.post('/signup', formData);
-            console.log('User created successfully:', response.data);
-            // const res = setupAxiosInterceptor(dispatch);
+            dispatch(setLoader(false));
             const { accessToken } = response.data;
             const user = response.data.user;
             dispatch(setAccessToken(accessToken));

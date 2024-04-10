@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../redux/actions/authSlice';
+import { setLoader } from '../redux/actions/infoSlice';
 
 const ChangeEmailModal = ({ onClose }) => {
     const [newEmail, setNewEmail] = useState('');
@@ -11,8 +12,9 @@ const ChangeEmailModal = ({ onClose }) => {
 
     const handleChangeEmail = async () => {
         try {
+            dispatch(setLoader(true));
             const response = await axios.post(
-                'http://localhost:4001/api/user/changeEmail',
+                'https://aeonaxy-a-backend.onrender.com/api/user/changeEmail',
                 {
                     newEmail
                 },
@@ -24,7 +26,7 @@ const ChangeEmailModal = ({ onClose }) => {
                 }
             );
     
-            // Handle successful response
+            dispatch(setLoader(false));
             dispatch(setUser(response.data.user));
             onClose();
         } catch (error) {

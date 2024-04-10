@@ -3,8 +3,9 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     selectedImage: null,
     location: "",
-    avatar:"",
-    selectedCards:[],
+    avatar: "",
+    selectedCards: [],
+    loader: false,
 };
 
 const infoSlice = createSlice({
@@ -23,9 +24,12 @@ const infoSlice = createSlice({
         setSelectedCards: (state, action) => {
             state.selectedCards = action.payload;
         },
+        setLoader: (state, action) => {
+            state.loader = action.payload;
+        },
     },
 });
 
-export const { setSelectedImage, setLocation, setSelectedCards, setAvatar } = infoSlice.actions;
+export const { setSelectedImage, setLocation, setSelectedCards, setAvatar,setLoader } = infoSlice.actions;
 
 export default infoSlice.reducer;

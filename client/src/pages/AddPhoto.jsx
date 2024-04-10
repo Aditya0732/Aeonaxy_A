@@ -5,7 +5,7 @@ import api from '../api/api';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { setAvatar, setLocation, setSelectedImage } from '../redux/actions/infoSlice';
+import { setAvatar, setLoader, setLocation, setSelectedImage } from '../redux/actions/infoSlice';
 
 const AddPhoto = () => {
     const accessToken = useSelector(state => state.auth.accessToken);
@@ -20,7 +20,8 @@ const AddPhoto = () => {
             formData.append('file', file);
 
             try {
-                const response = await axios.post('http://localhost:4001/upload', formData, {
+                dispatch(setLoader(true));
+                const response = await axios.post('https://aeonaxy-a-backend.onrender.com/upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${accessToken}`
@@ -28,8 +29,7 @@ const AddPhoto = () => {
                     withCredentials: true,
                     // credentials: 'include',
                 });
-                // Handle successful response
-                console.log('File uploaded successfully:', response.data.filename);
+                dispatch(setLoader(false));
                 dispatch(setAvatar(response.data.filename));
                 const reader = new FileReader();
                 reader.onload = () => {
@@ -37,7 +37,6 @@ const AddPhoto = () => {
                 };
                 reader.readAsDataURL(file);
             } catch (error) {
-                // Handle error
                 console.error('Error uploading file:', error);
             }
         }
@@ -58,7 +57,7 @@ const AddPhoto = () => {
             formData.append('file', file);
 
             try {
-                const response = await axios.post('http://localhost:4001/upload', formData, {
+                const response = await axios.post('https://aeonaxy-a-backend.onrender.com/upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${accessToken}`

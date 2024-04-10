@@ -9,6 +9,7 @@ import { setUser } from '../redux/actions/authSlice';
 import ChangeEmailModal from '../Modals/ChangeEmailModal';
 import { setShowToast, setToastMessage } from '../redux/actions/signUpSlice';
 import Footer from '../components/Footer';
+import { setLoader } from '../redux/actions/infoSlice';
 
 const Verify = () => {
   const user = useSelector(state => state.auth.user);
@@ -32,8 +33,9 @@ const Verify = () => {
 
   const handleChangeEmail = async () => {
     try {
+      dispatch(setLoader(true));
       const response = await axios.post(
-        'http://localhost:4001/api/user/resendConfirmationEmail',
+        'https://aeonaxy-a-backend.onrender.com/api/user/resendConfirmationEmail',
         {
           email: user.email
         },
@@ -44,6 +46,7 @@ const Verify = () => {
           withCredentials: true, // This will include cookies in the request
         }
       );
+      dispatch(setLoader(false));
       dispatch(setShowToast(true));
       dispatch(setToastMessage('Email sent again successfully !'));
       // Handle successful response
@@ -64,7 +67,7 @@ const Verify = () => {
           console.log("Verified user");
         } else {
           if (emailToken) {
-            const response = await axios.post("http://localhost:4001/api/verifyEmail", { emailToken });
+            const response = await axios.post("https://aeonaxy-a-backend.onrender.com/api/verifyEmail", { emailToken });
             console.log("res", response);
             const userData = response.data.user;
             dispatch(setUser(userData));

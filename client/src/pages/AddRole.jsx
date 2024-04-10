@@ -3,7 +3,7 @@ import { FaAngleLeft } from 'react-icons/fa6';
 import { Link, useNavigate } from 'react-router-dom';
 import CardOption from '../components/CardOption';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSelectedCards } from '../redux/actions/infoSlice';
+import { setLoader, setSelectedCards } from '../redux/actions/infoSlice';
 import axios from 'axios';
 
 const AddRole = () => {
@@ -24,8 +24,9 @@ const AddRole = () => {
 
     const handleFinish = async () => {
         try {
+            dispatch(setLoader(true));
             const response = await axios.post(
-                'http://localhost:4001/api/user/update',
+                'https://aeonaxy-a-backend.onrender.com/api/user/update',
                 {
                     selectedRoles: selectedCards,
                     location: location, // You can get the location from your component state
@@ -38,8 +39,7 @@ const AddRole = () => {
                     withCredentials: true, // This will include cookies in the request
                 }
             );
-            console.log('User details updated successfully:', response.data);
-            // dispatch(setSelectedCards([]));
+            dispatch(setLoader(false));
             navigate('/verify');
         } catch (error) {
             console.error('Error updating user details:', error);
