@@ -7,6 +7,7 @@ import { setFormData, setErrors, setShowToast, setToastMessage } from '../redux/
 import { setAccessToken, setUser } from '../redux/actions/authSlice';
 import api from '../api/api';
 import { setLoader } from '../redux/actions/infoSlice';
+import axios from 'axios';
 
 const SignUpForm = () => {
     const formData = useSelector((state) => state.signUp.formData);
@@ -57,7 +58,7 @@ const SignUpForm = () => {
         // If no errors, submit the form
         try {
             dispatch(setLoader(true));
-            const response = await api.post('/signup', formData);
+            const response = await axios.post('https://localhost:4001/api/signup', formData);
             dispatch(setLoader(false));
             const { accessToken } = response.data;
             const user = response.data.user;
