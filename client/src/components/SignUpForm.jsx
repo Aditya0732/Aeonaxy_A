@@ -15,6 +15,7 @@ const SignUpForm = () => {
     const showToast = useSelector((state) => state.signUp.showToast);
     const toastMessage = useSelector((state) => state.signUp.toastMessage);
     const user = useSelector(state => state.auth.user);
+    const selectedImage = useSelector(state => state.info.selectedImage);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -58,7 +59,7 @@ const SignUpForm = () => {
         // If no errors, submit the form
         try {
             dispatch(setLoader(true));
-            const response = await axios.post('https://localhost:4001/api/signup', formData);
+            const response = await api.post('/signup', formData);
             dispatch(setLoader(false));
             const { accessToken } = response.data;
             const user = response.data.user;
@@ -72,6 +73,7 @@ const SignUpForm = () => {
             }, 3000);
             navigate(`/addPhoto`);
         } catch (error) {
+            dispatch(setLoader(false));
             if (error.response) {
                 const { status, data } = error.response;
                 if (status === 409) {
@@ -193,7 +195,7 @@ const SignUpForm = () => {
                         </div>
                         <div className='flex gap-3'>
                             <button type="submit" className="bg-[#EA4C89] rounded-xl text-white px-4 py-2 hover:scale-105 duration-300 mt-6 w-full md:w-auto">Create Account</button>
-                            {user && (
+                            {user && formData.email && (
                                 <Link to="/addPhoto">
                                     <button type="submit" className="bg-[#585858] rounded-xl text-white px-4 py-2 hover:scale-105 duration-300 mt-6 w-full md:w-auto">Next</button>
                                 </Link>
